@@ -1,0 +1,92 @@
+library(officer)
+library(janitor)
+library(ggtext)
+library(tidyverse)
+library(readtext)
+library(dplyr)
+library(fs)
+library(stringr)
+
+
+library(readtext)
+library(tidytext)
+
+# Provide the file paths of the DOCX files
+file_paths <- c("T:/Producer Relations/Customer Research Data/Interviews/Transcripts/Noble Interview #1 Avery.6 20 2022.docx",
+                "T:/Producer Relations/Customer Research Data/Interviews/Transcripts/Noble Interview #2 Preston.6 20 2022.docx",
+                "T:/Producer Relations/Customer Research Data/Interviews/Transcripts/Noble Interview #3 Sierra.6 23 2022.docx",
+                "T:/Producer Relations/Customer Research Data/Interviews/Transcripts/Noble Interview.Blake D.6 29 2022.docx",
+                "T:/Producer Relations/Customer Research Data/Interviews/Transcripts/Noble Interview.Mike M.6 29 2022.docx",
+                "T:/Producer Relations/Customer Research Data/Interviews/Transcripts/Noble Interview.Toby J.6 29 2022.docx")
+
+# Create an empty list to store the extracted text
+extracted_text <- list()
+
+# Loop through the file paths and extract the text
+for (i in seq_along(file_paths)) {
+  doc <- read_docx(file_paths[i])
+  extracted_text[[i]] <- docx_summary(doc)
+}
+
+# Combine the extracted text into a single character vector
+combined_text <- unlist(extracted_text)
+
+# Split the text into individual words
+words <- str_split(combined_text, "\\W+")
+
+
+# Assuming you have a list named data_frames that contains the 7 data frames
+column_four_list <- list()
+
+# Loop through each data frame
+for (i in seq_along(extracted_text)) {
+  # Retrieve the 4th column of the current data frame and store it in the list
+  column_four_list[[i]] <- extracted_text[[i]][, 4]
+}
+
+# Access and print the 4th columns from the list
+for (i in seq_along(column_four_list)) {
+  print(column_four_list[[i]])
+}
+
+# Count the frequency of the phrase "good morning" in the first column of the first data frame
+covercrop <- str_count(column_four_list[[1]], regex("cover crop", ignore_case = TRUE))
+rotationalgrazing<- str_count(column_four_list[[1]], regex("rotational grazing", ignore_case = TRUE))
+regenerative1<-  str_count(column_four_list[[1]], regex("regenerative", ignore_case = TRUE))
+
+
+# Sum the individual counts
+total_count <- sum(covercrop,rotationalgrazing)
+
+
+## Doing in second dataframe
+
+covercrop <- str_count(column_four_list[[2]], regex("cover crop", ignore_case = TRUE))
+rotationalgrazing<- str_count(column_four_list[[2]], regex("rotational grazing", ignore_case = TRUE))
+regenerative2<-  str_count(column_four_list[[2]], regex("regenerative", ignore_case = TRUE))
+sum(regenerative2)
+
+library(tm)
+
+stopwords <- c("and", "the", "a","okay")
+
+# Replace stopwords in column_four_list
+pattern <- paste0("\\b(", paste(stopwords, collapse = "|"), ")\\b")
+column_four_list <- gsub(pattern, "", column_four_list, ignore.case = TRUE)
+
+# Print the modified column_four_list
+print(column_four_list)
+
+
+# Step 1: Split text into words
+words <- strsplit(column_four_list, "\\s+")
+
+# Step 2: Calculate word counts
+word_counts <- sapply(words, length)
+
+# Step 3: Create histogram
+hist(word_counts, breaks = "FD", xlab = "Number of Words", main = "Word Count Histogram")
+
+# Step 4: Identify the most counted word
+most_counted_word <- unlist(words)[which.max(word_counts)]
+print(paste("Most counted word:", most_counted_word))
